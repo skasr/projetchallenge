@@ -1,27 +1,14 @@
 <?php
-// Liste des budgets par evenement
-require_once '../../config/database.php';
-require_once '../../config/session.php';
-require_once '../../config/helpers.php';
-
 // Liste des evenements
 require_once '../../config/database.php';
 require_once '../../config/session.php';
 require_once '../../config/helpers.php';
 require_once '../../models/Event.php';
 
-// Verifie que l'utilisateur est connecté
 requireLogin();
 
 $user = getCurrentUser();
 
-// Recupere tous les evenements avec leur budget
-$sql = "SELECT e.id, e.nom, e.date_debut, e.statut, b.budget_total, b.id as budget_id
-        FROM events e
-        LEFT JOIN budgets b ON e.id = b.event_id
-        ORDER BY e.date_debut DESC";
-
-$events = fetchAll($sql);
 // Recupere tous les evenements
 $eventModel = new Event($pdo);
 $events = $eventModel->getAll();
@@ -38,20 +25,15 @@ if ($statut_filtre) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budgets - Gestion</title>
-    <link rel="stylesheet" href="../../../public/css/style.css">
     <title>Événements - Gestion</title>
-    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="../../../public/css/style.css">
 </head>
 <body>
     <div class="container">
-        <!-- Menu -->
         <nav class="sidebar">
             <h2>Gestion Events</h2>
             <ul>
                 <li><a href="../dashboard.php">Dashboard</a></li>
-                <li><a href="../events/liste.php">Événements</a></li>
-                <li><a href="liste.php" class="active">Budget</a></li>
                 <li><a href="liste.php" class="active">Événements</a></li>
                 <li><a href="../budget/liste.php">Budget</a></li>
                 <li><a href="../personnel/liste.php">Personnel</a></li>
@@ -65,18 +47,12 @@ if ($statut_filtre) {
             </div>
         </nav>
         
-        <!-- Contenu -->
-        <main class="main-content">
-            <h1>Gestion des budgets</h1>
-            
-        <!-- Contenu principal -->
         <main class="main-content">
             <div class="page-header">
                 <h1>Gestion des Événements</h1>
                 <a href="ajouter.php" class="btn-primary">+ Nouvel événement</a>
             </div>
             
-            <!-- Filtres -->
             <div class="filters">
                 <a href="liste.php" class="filter-btn <?php echo !$statut_filtre ? 'active' : ''; ?>">Tous</a>
                 <a href="liste.php?statut=en_preparation" class="filter-btn <?php echo $statut_filtre == 'en_preparation' ? 'active' : ''; ?>">En préparation</a>
@@ -84,15 +60,10 @@ if ($statut_filtre) {
                 <a href="liste.php?statut=termine" class="filter-btn <?php echo $statut_filtre == 'termine' ? 'active' : ''; ?>">Terminés</a>
             </div>
             
-            <!-- Tableau des evenements -->
             <div class="section">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Événement</th>
-                            <th>Date</th>
-                            <th>Statut</th>
-                            <th>Budget total</th>
                             <th>Nom</th>
                             <th>Type</th>
                             <th>Date début</th>
@@ -104,28 +75,6 @@ if ($statut_filtre) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($events as $event): ?>
-                        <tr>
-                            <td><strong><?php echo $event['nom']; ?></strong></td>
-                            <td><?php echo formatDate($event['date_debut']); ?></td>
-                            <td><span class="badge badge-<?php echo $event['statut']; ?>"><?php echo str_replace('_', ' ', $event['statut']); ?></span></td>
-                            <td>
-                                <?php if ($event['budget_total']): ?>
-                                    <?php echo number_format($event['budget_total'], 2); ?> €
-                                <?php else: ?>
-                                    <em>Non défini</em>
-                                <?php endif; ?>
-                            </td>
-                            <td class="actions">
-                                <?php if ($event['budget_id']): ?>
-                                    <a href="voir.php?event_id=<?php echo $event['id']; ?>" class="btn-small">Voir détails</a>
-                                    <a href="modifier.php?event_id=<?php echo $event['id']; ?>" class="btn-small">Modifier</a>
-                                <?php else: ?>
-                                    <a href="ajouter.php?event_id=<?php echo $event['id']; ?>" class="btn-small">Créer budget</a>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
                         <?php if (empty($events)): ?>
                             <tr>
                                 <td colspan="8" style="text-align: center;">Aucun événement trouvé</td>

@@ -1,9 +1,4 @@
 <?php
-// Formulaire de modification de personnel
-require_once '../../config/database.php';
-require_once '../../config/session.php';
-require_once '../../config/helpers.php';
-require_once '../../controllers/PersonnelController.php';
 // Formulaire de modification d'evenement
 require_once '../../config/database.php';
 require_once '../../config/session.php';
@@ -15,19 +10,6 @@ requireLogin();
 $user = getCurrentUser();
 $message = '';
 $error = '';
-
-$personnel_id = $_GET['id'] ?? null;
-
-if (!$personnel_id) {
-    redirect('liste.php');
-}
-
-$controller = new PersonnelController($pdo);
-$personnel = $controller->show($personnel_id);
-
-if (!$personnel) {
-    redirect('liste.php');
-}
 
 // Recupere l'ID de l'evenement
 $event_id = $_GET['id'] ?? null;
@@ -50,17 +32,6 @@ $users = fetchAll("SELECT id, nom, role FROM users WHERE role IN ('administrateu
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'nom' => clean($_POST['nom']),
-        'prenom' => clean($_POST['prenom']),
-        'email' => clean($_POST['email']),
-        'telephone' => clean($_POST['telephone']),
-        'poste' => clean($_POST['poste'])
-    ];
-    
-    $result = $controller->update($personnel_id, $data);
-    
-    if ($result['success']) {
-        $message = $result['message'];
-        $personnel = $controller->show($personnel_id);
         'type_event' => clean($_POST['type_event']),
         'date_debut' => $_POST['date_debut'],
         'date_fin' => $_POST['date_fin'] ?? null,
@@ -74,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($result['success']) {
         $message = $result['message'];
-        // Recharge l'evenement mis a jour
         $event = $controller->show($event_id);
     } else {
         $error = $result['message'];
@@ -87,21 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier le membre</title>
-    <link rel="stylesheet" href="../../../public/css/style.css">
     <title>Modifier l'événement</title>
-    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="../../../public/css/style.css">
 </head>
 <body>
     <div class="container">
-        <!-- Menu -->
         <nav class="sidebar">
             <h2>Gestion Events</h2>
             <ul>
                 <li><a href="../dashboard.php">Dashboard</a></li>
-                <li><a href="../events/liste.php">Événements</a></li>
-                <li><a href="../budget/liste.php">Budget</a></li>
-                <li><a href="liste.php" class="active">Personnel</a></li>
                 <li><a href="liste.php" class="active">Événements</a></li>
                 <li><a href="../budget/liste.php">Budget</a></li>
                 <li><a href="../personnel/liste.php">Personnel</a></li>
@@ -115,10 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </nav>
         
-        <!-- Contenu -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Modifier : <?php echo $personnel['prenom'] . ' ' . $personnel['nom']; ?></h1>
                 <h1>Modifier : <?php echo $event['nom']; ?></h1>
                 <a href="liste.php" class="btn-secondary">← Retour</a>
             </div>
@@ -135,13 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form method="POST" action="" class="form-event">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Nom *</label>
-                            <input type="text" name="nom" value="<?php echo $personnel['nom']; ?>" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Prénom *</label>
-                            <input type="text" name="prenom" value="<?php echo $personnel['prenom']; ?>" required>
                             <label>Nom de l'événement *</label>
                             <input type="text" name="nom" value="<?php echo $event['nom']; ?>" required>
                         </div>
@@ -163,13 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" value="<?php echo $personnel['email']; ?>">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Téléphone</label>
-                            <input type="text" name="telephone" value="<?php echo $personnel['telephone']; ?>">
                             <label>Date de début *</label>
                             <input type="date" name="date_debut" value="<?php echo $event['date_debut']; ?>" required>
                         </div>
@@ -181,8 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     
                     <div class="form-group">
-                        <label>Poste</label>
-                        <input type="text" name="poste" value="<?php echo $personnel['poste']; ?>">
                         <label>Lieu</label>
                         <input type="text" name="lieu" value="<?php echo $event['lieu']; ?>">
                     </div>

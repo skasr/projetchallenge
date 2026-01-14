@@ -4,21 +4,18 @@ require_once '../config/database.php';
 require_once '../config/session.php';
 require_once '../config/helpers.php';
 
-// Verifie que l'utilisateur est connecté
-// Verifie que l'user est connectér
 requireLogin();
 
 $user = getCurrentUser();
 
-// Recupere des statistiques
-// Recupere des statistiquesss
+// Statistiques
 $total_events = fetchOne("SELECT COUNT(*) as count FROM events")['count'];
 $events_en_cours = fetchOne("SELECT COUNT(*) as count FROM events WHERE statut = 'en_cours'")['count'];
 $events_termines = fetchOne("SELECT COUNT(*) as count FROM events WHERE statut = 'termine'")['count'];
 $total_tasks = fetchOne("SELECT COUNT(*) as count FROM tasks")['count'];
 $tasks_a_faire = fetchOne("SELECT COUNT(*) as count FROM tasks WHERE statut = 'a_faire'")['count'];
 
-// Recupere les derniers evenements
+// Evenements recents
 $recent_events = fetchAll("SELECT * FROM events ORDER BY created_at DESC LIMIT 5");
 ?>
 
@@ -32,12 +29,6 @@ $recent_events = fetchAll("SELECT * FROM events ORDER BY created_at DESC LIMIT 5
 </head>
 <body>
     <div class="container">
-        <!-- Menu de navigation -->
-    <link rel="stylesheet" href="/public/css/style.css">
-</head>
-<body>
-    <div class="container">
-        
         <nav class="sidebar">
             <h2>Gestion Events</h2>
             <ul>
@@ -55,16 +46,9 @@ $recent_events = fetchAll("SELECT * FROM events ORDER BY created_at DESC LIMIT 5
             </div>
         </nav>
         
-        <!-- Contenu principal -->
         <main class="main-content">
             <h1>Tableau de bord</h1>
             
-            <!-- Statistiques -->
-       
-        <main class="main-content">
-            <h1>Tableau de bord</h1>
-            
-           
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Événements</h3>
@@ -87,8 +71,6 @@ $recent_events = fetchAll("SELECT * FROM events ORDER BY created_at DESC LIMIT 5
                 </div>
             </div>
             
-            <!-- Liste des evenements recents -->
-           
             <div class="section">
                 <h2>Événements récents</h2>
                 
@@ -109,7 +91,7 @@ $recent_events = fetchAll("SELECT * FROM events ORDER BY created_at DESC LIMIT 5
                             <td><?php echo $event['type_event']; ?></td>
                             <td><?php echo formatDate($event['date_debut']); ?></td>
                             <td><?php echo $event['lieu']; ?></td>
-                            <td><span class="badge badge-<?php echo $event['statut']; ?>"><?php echo $event['statut']; ?></span></td>
+                            <td><span class="badge badge-<?php echo $event['statut']; ?>"><?php echo str_replace('_', ' ', $event['statut']); ?></span></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
