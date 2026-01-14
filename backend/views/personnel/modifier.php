@@ -1,0 +1,131 @@
+<?php
+// Formulaire de modification de personnel
+require_once '../../config/database.php';
+require_once '../../config/session.php';
+require_once '../../config/helpers.php';
+require_once '../../controllers/PersonnelController.php';
+
+requireLogin();
+
+$user = getCurrentUser();
+$message = '';
+$error = '';
+
+$personnel_id = $_GET['id'] ?? null;
+
+if (!$personnel_id) {
+    redirect('liste.php');
+}
+
+$controller = new PersonnelController($pdo);
+$personnel = $controller->show($personnel_id);
+
+if (!$personnel) {
+    redirect('liste.php');
+}
+
+// Traitement du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = [
+        'nom' => clean($_POST['nom']),
+        'prenom' => clean($_POST['prenom']),
+        'email' => clean($_POST['email']),
+        'telephone' => clean($_POST['telephone']),
+        'poste' => clean($_POST['poste'])
+    ];
+    
+    $result = $controller->update($personnel_id, $data);
+    
+    if ($result['success']) {
+        $message = $result['message'];
+        $personnel = $controller->show($personnel_id);
+    } else {
+        $error = $result['message'];
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier le membre</title>
+    <link rel="stylesheet" href="../../../public/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Menu -->
+        <nav class="sidebar">
+            <h2>Gestion Events</h2>
+            <ul>
+                <li><a href="../dashboard.php">Dashboard</a></li>
+                <li><a href="../events/liste.php">Événements</a></li>
+                <li><a href="../budget/liste.php">Budget</a></li>
+                <li><a href="liste.php" class="active">Personnel</a></li>
+                <li><a href="../prestataires/liste.php">Prestataires</a></li>
+                <li><a href="../tasks/liste.php">Tâches</a></li>
+            </ul>
+            <div class="user-info">
+                <p><strong><?php echo $user['nom']; ?></strong></p>
+                <p><?php echo $user['role']; ?></p>
+                <a href="../logout.php">Déconnexion</a>
+            </div>
+        </nav>
+        
+        <!-- Contenu -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Modifier : <?php echo $personnel['prenom'] . ' ' . $personnel['nom']; ?></h1>
+                <a href="liste.php" class="btn-secondary">← Retour</a>
+            </div>
+            
+            <?php if ($message): ?>
+                <div class="success-message"><?php echo $message; ?></div>
+            <?php endif; ?>
+            
+            <?php if ($error): ?>
+                <div class="error-message"><?php echo $error; ?></div>
+            <?php endif; ?>
+            
+            <div class="section">
+                <form method="POST" action="" class="form-event">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom *</label>
+                            <input type="text" name="nom" value="<?php echo $personnel['nom']; ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Prénom *</label>
+                            <input type="text" name="prenom" value="<?php echo $personnel['prenom']; ?>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" value="<?php echo $personnel['email']; ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Téléphone</label>
+                            <input type="text" name="telephone" value="<?php echo $personnel['telephone']; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Poste</label>
+                        <input type="text" name="poste" value="<?php echo $personnel['poste']; ?>">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Enregistrer les modifications</button>
+                        <a href="liste.php" class="btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
